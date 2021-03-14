@@ -1,0 +1,131 @@
+#!/bin/bash
+script_name=my
+command=$1
+subcommand=$2
+
+github_account_name=`git ls-remote --get-url origin | sed -n "s/git@github\.com:\(.*\)\/.*.git/\1/p"`
+github_repo_name=`git ls-remote --get-url origin | sed -n "s/git@github\.com:.*\/\(.*\).git/\1/p"`
+git_branch=`git branch --show-current`
+
+show_help () {
+  echo "Usage: $script_name <command>"
+  echo "Commands:"
+  echo "* install - intalls my to your shell profile as an alias"
+  echo "* jk - opens the Jenkins job for the current branch in web browser"
+  echo "* gh - opens up branch in GitHub"
+  echo "  * pr - opens up PR (requires github cli)"
+  echo "  * branch - opens up branch in GitHub"
+  echo "* help - show this"
+}
+
+upsearch () {
+  slashes=${PWD//[^\/]/}
+  directory="$PWD"
+  for (( n=${#slashes}; n>0; --n ))
+  do
+    test -e "$directory/$1" && echo "$directory/$1" && return
+    directory="$directory/.."
+  done
+}
+
+init () {
+  mycli_path=`upsearch .mycli`
+  if [[ -f "$mycli_path" ]]; then
+    source <(grep = $mycli_path)
+  fi
+}
+
+init
+
+open_browser () {
+  python -m webbrowser $1
+}
+
+do_install () {
+  SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+  echo Installing $script_name as an alias through your shell profile.
+
+  shell=$(echo $SHELL | sed -n "s/^.*\/\(.*\)$/\1/p")
+  alias_cmd="alias $script_name=${SCRIPT_DIR}/$script_name"
+
+  case $shell in
+    zsh) shell_profile=~/.zshrc;;
+    bash) shell_profile=~/.bashrc;;
+  esac
+
+  if [[ -z "$shell_profile" ]]
+  then
+    echo "Shell not identified. Please install manually by adding this line to your shell profile."
+    echo $alias_cmd
+    exit 1
+  else
+    read -p "Proceed? [y/N]" proceed
+    case $proceed in
+      [Yy]*)
+        echo $alias_cmd >> $shell_profile
+        echo
+        echo "Alias installed to $shell_profile."
+        echo
+        echo "You may now use tr in a new terminal session."
+        echo "Alternatively you may source the profile or run the alias for immediate effect."
+        echo
+        echo " $> $alias_cmd "
+        echo
+        ;;
+      [Nn]*|*)
+        echo Not installing. Exiting.
+        exit;;
+    esac
+  fi
+}
+
+do_jenkins () {
+  case "$subcommand" in
+    show|*)
+      if [[ -z "$jenkins_base_url" ]]; then
+        echo "Please set jenkins_base_url in your .mycli file."
+        exit 1
+      else
+        jenkins_pipeline_url="$jenkins_base_url/job/${github_account_name}/job/${github_repo_name}/job/${git_branch}"
+        open_browser $jenkins_pipeline_url
+      fi
+      ;;
+  esac
+}
+
+check_gh_cli () {
+  if ! [ -x "$(command -v gh)" ]
+  then
+    echo "Please install github cli. Visit https://github.com/cli/cli."
+    exit 1
+  fi
+}
+
+do_github () {
+  case "$subcommand" in
+    pr)
+      check_gh_cli
+      gh pr view --web
+      ;;
+    branch|*)
+      open_browser "https://github.com/${github_account_name}/${github_repo_name}/tree/${git_branch}"
+      ;;
+  esac
+}
+
+case "$command" in
+  install)
+    do_install
+    ;;
+  gh)
+    do_github
+    ;;
+  jk)
+    do_jenkins
+    ;;
+  help|*)
+    show_help
+    ;;
+esac
+
+
