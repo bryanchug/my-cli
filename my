@@ -3,6 +3,22 @@ script_name=my
 command=$1
 subcommand=$2
 
+upsearch () {
+  slashes=${PWD//[^\/]/}
+  directory="$PWD"
+  for (( n=${#slashes}; n>0; --n ))
+  do
+    test -e "$directory/$1" && echo "$directory/$1" && return
+    directory="$directory/.."
+  done
+}
+
+git_path=`upsearch .git`
+if [[ ! -f "$git_path" ]]; then
+  echo "Not in a git repository. Exiting."
+  exit 1
+fi
+
 github_account_name=`git ls-remote --get-url origin | sed -n "s/git@github\.com:\(.*\)\/.*.git/\1/p"`
 github_repo_name=`git ls-remote --get-url origin | sed -n "s/git@github\.com:.*\/\(.*\).git/\1/p"`
 git_branch=`git branch --show-current`
@@ -18,15 +34,6 @@ show_help () {
   echo "* help - show this"
 }
 
-upsearch () {
-  slashes=${PWD//[^\/]/}
-  directory="$PWD"
-  for (( n=${#slashes}; n>0; --n ))
-  do
-    test -e "$directory/$1" && echo "$directory/$1" && return
-    directory="$directory/.."
-  done
-}
 
 init () {
   mycli_path=`upsearch .mycli`
