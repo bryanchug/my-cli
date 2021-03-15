@@ -1,4 +1,7 @@
 #!/bin/bash
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
 script_name=my
 command=$1
 subcommand=$2
@@ -49,7 +52,6 @@ open_browser () {
 }
 
 do_install () {
-  SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
   echo Installing $script_name as an alias through your shell profile.
 
   shell=$(echo $SHELL | sed -n "s/^.*\/\(.*\)$/\1/p")
