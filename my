@@ -17,7 +17,7 @@ upsearch () {
 }
 
 git_path=`upsearch .git`
-if [[ ! -f "$git_path" ]]; then
+if [[ -z "$git_path" ]]; then
   echo "Not in a git repository. Exiting."
   exit 1
 fi
@@ -30,6 +30,7 @@ show_help () {
   echo "Usage: $script_name <command>"
   echo "Commands:"
   echo "* install - installs my to your shell profile as an alias"
+  echo "* githooks - installs githooks to current repo"
   echo "* jk - opens the Jenkins job for the current branch in web browser"
   echo "* gh - opens up branch in GitHub"
   echo "  * pr - opens up PR (requires github cli)"
@@ -88,6 +89,28 @@ do_install () {
   fi
 }
 
+do_githooks () {
+  git_hooks_library="$SCRIPT_DIR/githooks"
+  git_hooks_path="$git_path/hooks"
+
+  echo "Git hooks to install:"
+  for file in $git_hooks_library/*
+  do
+      if [[ -f $file ]]; then
+        echo "* ${file##*/}"
+      fi
+  done
+  read -p "Proceed? [y/N]" proceed
+  case $proceed in
+    [Yy]*)
+      ln -s $SCRIPT_DIR/githooks/* $git_hooks_path
+      ;;
+    [Nn]*|*)
+      echo Not installing. Exiting.
+      ;;
+  esac
+}
+
 do_jenkins () {
   case "$subcommand" in
     show|*)
@@ -126,6 +149,9 @@ case "$command" in
   install)
     do_install
     ;;
+  githooks)
+    do_githooks
+    ;;
   gh)
     do_github
     ;;
@@ -136,5 +162,3 @@ case "$command" in
     show_help
     ;;
 esac
-
-
