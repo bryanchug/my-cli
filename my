@@ -29,7 +29,7 @@ git_branch=`git branch --show-current`
 show_help () {
   echo "Usage: $script_name <command>"
   echo "Commands:"
-  echo "* install - intalls my to your shell profile as an alias"
+  echo "* install - installs my to your shell profile as an alias"
   echo "* jk - opens the Jenkins job for the current branch in web browser"
   echo "* gh - opens up branch in GitHub"
   echo "  * pr - opens up PR (requires github cli)"
