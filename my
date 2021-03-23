@@ -42,7 +42,7 @@ show_help () {
 init () {
   mycli_path=`upsearch .mycli`
   if [[ -f "$mycli_path" ]]; then
-    source <(grep = $mycli_path)
+    eval `grep "=" $mycli_path`
   fi
 }
 
