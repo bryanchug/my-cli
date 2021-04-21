@@ -49,7 +49,7 @@ init () {
 init
 
 open_browser () {
-  python -m webbrowser $1
+  python3 -m webbrowser $1
 }
 
 do_install () {
