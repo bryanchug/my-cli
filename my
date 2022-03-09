@@ -35,6 +35,7 @@ show_help () {
   echo "* gh - opens up branch in GitHub"
   echo "  * pr - opens up PR (requires github cli)"
   echo "  * branch - opens up branch in GitHub"
+  echo "* jr - opens JIRA for the current branch in web browser"
   echo "* help - show this"
 }
 
@@ -125,6 +126,15 @@ do_jenkins () {
   esac
 }
 
+do_jira () {
+  if [[ "$jira_base_url" ]]; then
+    open_browser $jira_base_url/browse/${git_branch}
+  else
+    echo "Please set jira_base_url in your .mycli file."
+    exit 1
+  fi
+}
+
 check_gh_cli () {
   if ! [ -x "$(command -v gh)" ]
   then
@@ -157,6 +167,9 @@ case "$command" in
     ;;
   jk)
     do_jenkins
+    ;;
+  jr)
+    do_jira
     ;;
   help|*)
     show_help
