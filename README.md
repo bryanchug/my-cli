@@ -11,6 +11,7 @@ Commands:
 * gh - opens up branch in GitHub
   * pr - opens up PR (requires github cli)
   * branch - opens up branch in GitHub
+* jr - opens JIRA for the current branch in web browser
 * help - show this
 ```
 
